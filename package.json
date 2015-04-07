@@ -39,6 +39,7 @@
     "mocha-loader": "^0.7.1",
     "mocha-phantomjs": "^3.5.3",
     "phantomjs": "^1.9.16",
+    "sinon": "git://github.com/cjohansen/Sinon.JS#sinon-2.0",
     "webpack": "^1.8.0",
     "webpack-dev-server": "^1.8.0"
   }
