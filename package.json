@@ -21,7 +21,18 @@
     "expires",
     "last-modified"
   ],
-  "author": "Andrey Ustinov <ustinov.post@gmail.com> (https://github.com/letsrock-today)",
+  "contributors": [
+      {
+          "name": "Nikolay Turpitko",
+          "email": "nikolay@turpitko.com",
+          "url": "https://github.com/nikolay-turpitko"
+      },
+      {
+          "name": "Andrey Ustinov",
+          "email": "ustinov.post@gmail.com",
+          "url": "https://github.com/austinov"
+      }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/letsrock-today/caching-xhr/issues"
@@ -37,10 +48,9 @@
     "chai": "^2.2.0",
     "mocha": "^2.2.1",
     "mocha-loader": "^0.7.1",
-    "mocha-phantomjs": "^3.5.3",
-    "phantomjs": "^1.9.16",
     "sinon": "^1.14.1",
     "webpack": "^1.8.0",
-    "webpack-dev-server": "^1.8.0"
+    "webpack-dev-server": "^1.8.0",
+    "caching-xhr": "*"
   }
 }
