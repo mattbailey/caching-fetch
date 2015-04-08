@@ -15,9 +15,10 @@ module.exports = {
             this.connectionStatusCallback = cb;
         },
 
-        request(method, url, data, settings0) {
+        request(method, url, data0, settings0) {
 
             var settings = settings0 || {},
+                data = data0 || {},
                 $ = MINI.$,
                 _ = MINI._;
 
@@ -173,7 +174,6 @@ module.exports = {
             var xhr = settings.xhr || {},
                 ontimeout = xhr.ontimeout || () => {},
                 _fromCache = (xhr) => {
-                    this.connectionStatusCallback(false);
                     var c = _get(url);
                     if (!!c.r) {
                         if (xhr['status'] == 304) {
@@ -190,6 +190,7 @@ module.exports = {
             xhr.timeout = xhr.timeout || 5000;
             xhr.ontimeout = () => {
                 _fromCache(xhr, url);
+                 this.connectionStatusCallback(false);
                 ontimeout();
             };
 
