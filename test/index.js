@@ -1,6 +1,5 @@
 import chai from 'chai';
 import xhr from '../index';
-import sinon from 'sinon';
 
 chai.should();
 
