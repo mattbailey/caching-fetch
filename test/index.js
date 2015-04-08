@@ -1,24 +1,63 @@
 import chai from 'chai';
 import xhr from '../index';
+import sinon from 'sinon';
 
 chai.should();
 
-describe('get', function () {
+describe('#get', () => {
 
-    beforeEach(function () {
-        this._xhr = sinon.useFakeXMLHttpRequest();
+    let self = this;
+    let _xhr;
+    let _requests;
 
-        this.requests = [];
-        this._xhr.onCreate = function (xhr) {
-            this.requests.push(xhr);
-        }.bind(this);
+    beforeEach(() => {
+        _xhr = sinon.useFakeXMLHttpRequest();
+        _requests = [];
+        _xhr.onCreate = (xhr) => {
+            _requests.push(xhr);
+        }.bind(self);
     });
 
-    afterEach(function () {
-        this._xhr.restore();
+    beforeEach(() => {
+        localStorage.clear();
     });
 
-    it('get caching', function () {
-        console.log('Test OK');
+    afterEach(() => {
+        _xhr.restore();
+    });
+
+    it('get request without caching', (done) => {
+        var data = {someField:'someValue'};
+        var jsonData = JSON.stringify(data);
+        xhr.get('A', {}, {}).then((responseText) => {
+            var res = JSON.parse(responseText);
+            res.should.deep.equal(data);
+            done();
+        });
+        _requests[0].respond(200, {
+            'Content-Type': 'application/json'
+        }, jsonData);
+    });
+
+    it('get request with Expires', (done) => {
+        var data = {
+            someField: 'someValue'
+        };
+        var jsonData = JSON.stringify(data);
+        var d = new Date();
+        d.setDate((new Date()).getDate() + 3);
+        xhr.get('A', {arg0:'val0', arg1:42}, {}).then((responseText) => {
+            var res = JSON.parse(responseText);
+            res.should.deep.equal(data);
+            var e = localStorage.getItem('xhr|e|A{"arg0":"val0","arg1":42}');
+            e.should.equal(d.toUTCString());
+            var r = JSON.parse(localStorage.getItem('xhr|r|A{"arg0":"val0","arg1":42}'));
+            r.should.deep.equal(data);
+            done();
+        });
+        _requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Expires': d.toUTCString()
+        }, jsonData);
     });
 });
