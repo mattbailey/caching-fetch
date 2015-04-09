@@ -50,7 +50,9 @@ describe('#get', () => {
         var jsonData = JSON.stringify(data);
         var d = new Date();
         d.setDate((new Date()).getDate() + 3);
-        xhr.get('B', null, {cache:false}).then((responseText) => {
+        xhr.get('B', null, {
+            cache: false
+        }).then((responseText) => {
             var res = JSON.parse(responseText);
             res.should.deep.equal(data);
             should.not.exist(localStorage.getItem('xhr|e|B{}'));
@@ -72,8 +74,14 @@ describe('#get', () => {
         var jsonData = JSON.stringify(data);
         var d = new Date();
         d.setDate((new Date()).getDate() + 3);
-        xhr.get('C', { arg0: 'val0', arg1: 42 }).then((responseText1) => {
-            xhr.get('C', { arg0: 'val0', arg1: 42 }).then((responseText2) => {
+        xhr.get('C', {
+            arg0: 'val0',
+            arg1: 42
+        }).then((responseText1) => {
+            xhr.get('C', {
+                arg0: 'val0',
+                arg1: 42
+            }).then((responseText2) => {
                 responseText1.should.equal(responseText2);
                 var res = JSON.parse(responseText1);
                 res.should.deep.equal(data);
@@ -106,8 +114,14 @@ describe('#get', () => {
         d1.setDate((new Date()).getDate() - 3);
         d2.setDate((new Date()).getDate() + 3);
 
-        xhr.get('D', { arg0: 'val0', arg1: 42 }).then((responseText1) => {
-            xhr.get('D', { arg0: 'val0', arg1: 42 }).then((responseText2) => {
+        xhr.get('D', {
+            arg0: 'val0',
+            arg1: 42
+        }).then((responseText1) => {
+            xhr.get('D', {
+                arg0: 'val0',
+                arg1: 42
+            }).then((responseText2) => {
                 responseText1.should.equal(responseText2);
                 var res = JSON.parse(responseText1);
                 res.should.deep.equal(data);
@@ -133,5 +147,91 @@ describe('#get', () => {
             'Last-Modified': d3.toUTCString(),
             'Expires': d1.toUTCString()
         }, jsonData);
+    });
+
+    it('default settings', (done) => {
+        xhr.get('E').then((responseText) => {
+            _requests[0].requestHeaders['Content-Type'].should.equal('application/json');
+            _requests[0].timeout.should.equal(5000);
+            done();
+        }).error((status, responseText) => {
+            throw 'Error, responseText: ' + responseText;
+        });
+        _requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Expires': new Date().toUTCString()
+        }, '');
+    });
+
+    it('default settings (changed)', (done) => {
+        xhr.setDefaultSettings({
+            headers: {
+                'Content-Type': 'text/html'
+            },
+            xhr: {
+                timeout: 3000
+            }
+        });
+        xhr.get('F').then((responseText) => {
+            _requests[0].requestHeaders['Content-Type'].should.equal('text/html');
+            _requests[0].timeout.should.equal(3000);
+            done();
+        }).error((status, responseText) => {
+            throw 'Error, responseText: ' + responseText;
+        });
+        _requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Expires': new Date().toUTCString()
+        }, '');
+    });
+
+    it('settings (merged)', (done) => {
+        xhr.setDefaultSettings({
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            xhr: {
+                timeout: 5000
+            }
+        });
+        xhr.get('G', {}, {
+            headers: {
+                'Content-Type': 'text/html'
+            }
+        }).then((responseText) => {
+            _requests[0].requestHeaders['Content-Type'].should.equal('text/html');
+            _requests[0].timeout.should.equal(5000);
+            done();
+        }).error((status, responseText) => {
+            throw 'Error, responseText: ' + responseText;
+        });
+        _requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Expires': new Date().toUTCString()
+        }, '');
+    });
+
+    it('callbacks', (done) => {
+        let c = 0;
+        xhr.connectionStatusSubscribe((status) => {
+            ++c;
+            if (c == 1) {
+                status.should.equal(false);
+            } else if (c == 2) {
+                status.should.equal(true);
+                done();
+            }
+        });
+        xhr.get('H').always(() => {
+            xhr.get('I');
+            _requests[1].respond(200, {
+                'Content-Type': 'application/json',
+                'Expires': new Date().toUTCString()
+            }, '');
+        });
+        _requests[0].respond(0, {
+            'Content-Type': 'application/json',
+            'Expires': new Date().toUTCString()
+        }, '');
     });
 });

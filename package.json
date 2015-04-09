@@ -22,16 +22,16 @@
     "last-modified"
   ],
   "contributors": [
-      {
-          "name": "Nikolay Turpitko",
-          "email": "nikolay@turpitko.com",
-          "url": "https://github.com/nikolay-turpitko"
-      },
-      {
-          "name": "Andrey Ustinov",
-          "email": "ustinov.post@gmail.com",
-          "url": "https://github.com/austinov"
-      }
+    {
+      "name": "Nikolay Turpitko",
+      "email": "nikolay@turpitko.com",
+      "url": "https://github.com/nikolay-turpitko"
+    },
+    {
+      "name": "Andrey Ustinov",
+      "email": "ustinov.post@gmail.com",
+      "url": "https://github.com/austinov"
+    }
   ],
   "license": "MIT",
   "bugs": {
@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/letsrock-today/caching-xhr",
   "dependencies": {
+    "deep-extend": "^0.3.3",
     "minified": "^1.0.1"
   },
   "devDependencies": {
