@@ -40,6 +40,7 @@
   "homepage": "https://github.com/letsrock-today/caching-xhr",
   "dependencies": {
     "deep-extend": "^0.3.3",
+    "lz-string": "^1.4.1",
     "minified": "^1.0.1"
   },
   "devDependencies": {

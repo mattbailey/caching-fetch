@@ -1,5 +1,6 @@
 import MINI from 'minified';
 import deepExtend from 'deep-extend';
+import LZString from 'lz-string';
 
 let $ = MINI.$,
     _ = MINI._;
@@ -94,11 +95,19 @@ let _defaultSettings = {
         }
     },
     _cb = () => {},
-    _connected = true;
+    _connected = true,
+    _cacheSettings = {
+        keyPrefix: 'xhr|',
+        maxItems: 200
+    };
 
 
 // Implementation
 
+// This method wraps $.request() and invokes callback when it detects connection
+// status change. It assumes connection is lost when $.request() invokes error
+// callback with status 0. All other status codes and successful request mean
+// that connection is OK.
 function _notifingRequest(method, url, data, settings) {
     let prom = $.request(method, url, data, settings);
     prom.then(() => {
@@ -117,6 +126,9 @@ function _notifingRequest(method, url, data, settings) {
     return prom;
 }
 
+// This method utilizes localStorage to cache server responses with HTTP headers
+// 'Expires' and 'Last-Modified'. It uses _notifingRequest() to send actual
+// request.
 function _cachingRequest(method, url, data, settings) {
     if (settings.cache === false || method.toUpperCase() != 'GET') {
         return _notifingRequest(method, url, data, settings);
@@ -137,7 +149,7 @@ function _cachingRequest(method, url, data, settings) {
             return {
                 e: localStorage.getItem(KEY_EU),
                 m: localStorage.getItem(KEY_MU),
-                r: localStorage.getItem(KEY_RU)
+                r: LZString.decompressFromUTF16(localStorage.getItem(KEY_RU))
             };
         },
 
@@ -148,7 +160,7 @@ function _cachingRequest(method, url, data, settings) {
                     !!e ? localStorage.setItem(KEY_EU, e) : localStorage.removeItem(KEY_EU);
                     !!m ? localStorage.setItem(KEY_MU, m) : localStorage.removeItem(KEY_MU);
                     if (!localStorage.getItem(KEY_RU)) {
-                        localStorage.setItem(KEY_RU, r);
+                        localStorage.setItem(KEY_RU, LZString.compressToUTF16(r));
                         localStorage.setItem(KEY_C, +localStorage.getItem(KEY_C) + 1);
                     }
                 } catch (e) {
@@ -287,3 +299,39 @@ function _cachingRequest(method, url, data, settings) {
 
     return prom;
 };
+
+function _key(url, data) {
+    return _cacheSettings.keyPrefix + 'v|' + LZString.compressToUTF16(url + JSON.stringify(data || {}));
+}
+
+function _get(key) {
+    return JSON.parse(LZString.decompressFromUTF16(localStorage.getItem(key)));
+}
+
+function _exist(key) {
+    return localStorage.getItem(key) !== null;
+}
+
+function _put(key, value) {
+    localStorage.setItem(key, LZString.compressToUTF16(JSON.stringify(value)));
+}
+
+function _cntrKey() {
+    return _cacheSettings.keyPrefix + 'c|';
+}
+
+function _incr(cntrKey) {
+    localStorage.setItem(cntrKey, +localStorage.getItem(cntrKey) + 1);
+}
+
+function _decr(cntrKey) {
+    localStorage.setItem(cntrKey, +localStorage.getItem(cntrKey) - 1);
+}
+
+function _reset(cntrKey) {
+    localStorage.setItem(cntrKey, 0);
+}
+
+function _indexKey() {
+	return _cacheSettings.keyPrefix + 'i|';
+}
