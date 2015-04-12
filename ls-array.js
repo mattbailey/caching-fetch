@@ -38,7 +38,7 @@ export class LSArray {
 
     push(x) {
         let t = this,
-            l = this.len();
+            l = t.len();
         _storage.setItem(key(t, l), x);
         _storage.setItem(t.lenKey, l + 1);
     }

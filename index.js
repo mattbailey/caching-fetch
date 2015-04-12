@@ -130,6 +130,11 @@ function _notifingRequest(method, url, data, settings) {
 // 'Expires' and 'Last-Modified'. It uses _notifingRequest() to send actual
 // request.
 function _cachingRequest(method, url, data, settings) {
+	try {
+	    localStorage.getItem('x');
+	} catch (e) {
+	    settings.cache = false;
+	}
     if (settings.cache === false || method.toUpperCase() != 'GET') {
         return _notifingRequest(method, url, data, settings);
     }

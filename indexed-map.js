@@ -57,7 +57,8 @@ export class IndexedMap {
     // Provide callback to fix heap.
     updateItem(x, fixCallback) {
         let t = this,
-            mv = JSON.parse(_storage.getItem(dataKey(t, x.k)));
+	    k = dataKey(t, x.k),
+            mv = JSON.parse(_storage.getItem(k));
         if (mv === null) {
             throw 'Attempt to change unexisting item';
         }
@@ -68,28 +69,31 @@ export class IndexedMap {
         }
         mv.d = x.d;
         iv.p = x.p;
-        _storage.setItem(dataKey(t, x.k), JSON.stringify(mv));
+        _storage.setItem(k, JSON.stringify(mv));
         indexArray.setAt(mv.i, JSON.stringify(iv));
         fixCallback(t, mv.i);
     }
 
     push(x) {
         let t = this,
-            mv = JSON.parse(_storage.getItem(dataKey(t, x.k))),
+	    k = dataKey(t, x.k),
+            mv = JSON.parse(_storage.getItem(k)),
             l = t.indexArray.len(),
             iv = { k: x.k, p: x.p };
 	if (mv !== null) {
 	    throw 'Attempt to push duplicate item';
 	}
         mv = { i: l, d: x.d };
-        _storage.setItem(dataKey(t, x.k), JSON.stringify(mv));
+        _storage.setItem(k, JSON.stringify(mv));
         t.indexArray.push(JSON.stringify(iv));
     }
 
     pop() {
         let t = this,
             iv = JSON.parse(t.indexArray.pop()),
-            mv = JSON.parse(_storage.getItem(dataKey(t, iv.k)));
+	    k = dataKey(t, iv.k),
+            mv = JSON.parse(_storage.getItem(k));
+	_storage.removeItem(k);
         return { d: mv.d, k: iv.k, p: iv.p };
     }
 
@@ -109,12 +113,14 @@ export class IndexedMap {
 	    indexArray = t.indexArray,
             ivi = JSON.parse(indexArray.getAt(i)),
             ivj = JSON.parse(indexArray.getAt(j)),
-            mvi = JSON.parse(_storage.getItem(dataKey(t, ivi.k))),
-            mvj = JSON.parse(_storage.getItem(dataKey(t, ivj.k)));
+	    ivik = dataKey(t, ivi.k),
+	    ivjk = dataKey(t, ivj.k),
+            mvi = JSON.parse(_storage.getItem(ivik)),
+            mvj = JSON.parse(_storage.getItem(ivjk));
 	mvi.i = j;
 	mvj.i = i;
-        _storage.setItem(dataKey(t, ivi.k), JSON.stringify(mvi));
-        _storage.setItem(dataKey(t, ivj.k), JSON.stringify(mvj));
+        _storage.setItem(ivik, JSON.stringify(mvi));
+        _storage.setItem(ivjk, JSON.stringify(mvj));
         indexArray.setAt(i, JSON.stringify(ivj));
         indexArray.setAt(j, JSON.stringify(ivi));
     }

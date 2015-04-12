@@ -52,8 +52,8 @@ module.exports = {
     // Its complexity is O(n) where n = h.len().
     init: (h) => {
         // heapify
-        for (let n = h.len(), i = n / 2 - 1; i >= 0; --i) {
-            down(h, i, n);
+        for (let n = h.len(), i = Math.trunc(n / 2) - 1; i >= 0; --i) {
+            this.down(h, i, n);
         }
     },
 
@@ -61,7 +61,7 @@ module.exports = {
     // O(log(n)) where n = h.len().
     push(h, x) {
         h.push(x);
-        up(h, h.len() - 1);
+        this.up(h, h.len() - 1);
     },
 
     // pop() removes the minimum element (according to less()) from the heap
@@ -70,7 +70,7 @@ module.exports = {
     pop(h) {
         let n = h.len() - 1;
         h.swap(0, n);
-        down(h, 0, n);
+        this.down(h, 0, n);
         return h.pop();
     },
 
@@ -80,8 +80,8 @@ module.exports = {
         let n = h.len() - 1;
         if (n != i) {
             h.swap(i, n);
-            down(h, i, n);
-            up(h, i);
+            this.down(h, i, n);
+            this.up(h, i);
         }
         return h.pop();
     },
@@ -91,13 +91,13 @@ module.exports = {
     // but less expensive than, calling remove(h, i) followed by a push() of the new value.
     // The complexity is O(log(n)) where n = h.len().
     fix(h, i) {
-        down(h, i, h.len());
-        up(h, i);
+        this.down(h, i, h.len());
+        this.up(h, i);
     },
 
     up(h, j) {
         for (;;) {
-            let i = (j - 1) / 2; // parent
+            let i = Math.trunc((j - 1) / 2); // parent
             if (i == j || !h.less(j, i)) {
                 break;
             }
@@ -112,8 +112,8 @@ module.exports = {
             if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
                 break;
             }
-            j = j1; // left child
-            let j2 = j1 + 1;
+            let j = j1, // left child
+                j2 = j1 + 1;
             if (j2 < n && !h.less(j1, j2)) {
                 j = j2; // = 2*i + 2  // right child
             }
