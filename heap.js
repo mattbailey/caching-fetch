@@ -50,7 +50,7 @@ module.exports = {
     // can be used. init() is idempotent with respect to the heap invariants
     // and may be called whenever the heap invariants may have been invalidated.
     // Its complexity is O(n) where n = h.len().
-    init: (h) => {
+    init(h) {
         // heapify
         for (let n = h.len(), i = Math.trunc(n / 2) - 1; i >= 0; --i) {
             this.down(h, i, n);

@@ -8,6 +8,7 @@ import * as cache from '../cache';
 
 
 let should = chai.should();
+console.clear();
 
 describe('#LSArray', () => {
 
@@ -356,6 +357,16 @@ describe('#Cache', () => {
 	exec(100, 1000);
 	exec(1000, 1000);
 	exec(10000, 1000);
+	console.log('Creating new cache on top of existing data in storage...');
+	localStorage.clear();
+        c = new cache.Cache('tmp', 1000);
+	console.log('Cache of size 1000:');
+	exec(1000, 1000);
+	console.log('Data generated, creating new cache...');
+	let dt = measure(1000, () => {
+	    c = new cache.Cache('tmp', 1000);
+	});
+	console.log('Cache created in ' + (dt/1000).toFixed(2) + 'ms');
 	console.log('=========================');
 
         done();
@@ -444,10 +455,10 @@ describe('#get', () => {
                 responseText1.should.equal(responseText2);
                 var res = JSON.parse(responseText1);
                 res.should.deep.equal(data);
-                var e = localStorage.getItem('xhr|e|C{"arg0":"val0","arg1":42}');
-                e.should.equal(d.toUTCString());
-                var r = JSON.parse(LZString.decompressFromUTF16(localStorage.getItem('xhr|r|C{"arg0":"val0","arg1":42}')));
-                r.should.deep.equal(data);
+	        var _cache = new cache.Cache('xhr', 1000);
+	        var emr = _cache.getItem(_cache.keyFromUrl('C', {arg0:'val0', arg1: 42}));
+                emr.e.should.equal(d.toUTCString());
+                JSON.parse(emr.r).should.deep.equal(data);
                 _requests.length.should.equal(1);
                 done();
             }).error((status, responseText) => {
@@ -484,10 +495,10 @@ describe('#get', () => {
                 responseText1.should.equal(responseText2);
                 var res = JSON.parse(responseText1);
                 res.should.deep.equal(data);
-                var e = localStorage.getItem('xhr|e|D{"arg0":"val0","arg1":42}');
-                e.should.equal(d2.toUTCString());
-                var r = JSON.parse(LZString.decompressFromUTF16(localStorage.getItem('xhr|r|D{"arg0":"val0","arg1":42}')));
-                r.should.deep.equal(data);
+	        var _cache = new cache.Cache('xhr', 1000);
+	        var emr = _cache.getItem(_cache.keyFromUrl('D', {arg0:'val0', arg1: 42}));
+                emr.e.should.equal(d2.toUTCString());
+                JSON.parse(emr.r).should.deep.equal(data);
                 d3.toUTCString().should.equal(_requests[1].requestHeaders['If-Modified-Since']);
                 done();
             }).error((status, responseText) => {
