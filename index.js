@@ -1,6 +1,6 @@
 import MINI from 'minified';
 import deepExtend from 'deep-extend';
-import * as cache from './cache';
+import {Cache} from 'heap-local-storage';
 
 let $ = MINI.$,
     _ = MINI._;
@@ -140,7 +140,7 @@ function _cachingRequest(method, url, data, settings) {
         return _notifingRequest(method, url, data, settings);
     }
     if (!_cache) {
-        _cache = new cache.Cache(_cacheSettings.keyPrefix, _cacheSettings.maxItems);
+        _cache = new Cache(_cacheSettings.keyPrefix, _cacheSettings.maxItems);
     }
     let prom = _.promise(),
         key = _cache.keyFromUrl(url, data),

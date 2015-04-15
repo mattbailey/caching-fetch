@@ -40,7 +40,7 @@
   "homepage": "https://github.com/letsrock-today/caching-xhr",
   "dependencies": {
     "deep-extend": "^0.3.3",
-    "lz-string": "^1.4.1",
+    "heap-local-storage": "^1.0.2",
     "minified": "^1.0.1"
   },
   "devDependencies": {
@@ -52,7 +52,6 @@
     "mocha-loader": "^0.7.1",
     "sinon": "^1.14.1",
     "webpack": "^1.8.0",
-    "webpack-dev-server": "^1.8.0",
-    "caching-xhr": "*"
+    "webpack-dev-server": "^1.8.0"
   }
 }
