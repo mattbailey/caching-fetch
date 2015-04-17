@@ -1,7 +1,7 @@
 {
-  "name": "caching-xhr",
-  "version": "1.0.1",
-  "description": "Wrapper around isomorphic-fetch with localStorage cache support.",
+  "name": "caching-fetch",
+  "version": "1.0.0",
+  "description": "Wrapper around Fetch API with localStorage cache support.",
   "main": "lib/cahcing-fetch.js",
   "scripts": {
     "test-cli": "mocha --compilers js:babel/register -r mock-local-storage ./test/caching-fetch.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/letsrock-today/caching-xhr.git"
+    "url": "https://github.com/letsrock-today/caching-fetch.git"
   },
   "keywords": [
     "xhr",
@@ -39,9 +39,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/letsrock-today/caching-xhr/issues"
+    "url": "https://github.com/letsrock-today/caching-fetch/issues"
   },
-  "homepage": "https://github.com/letsrock-today/caching-xhr",
+  "homepage": "https://github.com/letsrock-today/caching-fetch",
   "dependencies": {
     "core-js": "^0.8.3",
     "deep-extend": "^0.3.3",
