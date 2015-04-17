@@ -1,4 +1,4 @@
-import fetch from 'isomorphic-fetch';
+import 'isomorphic-fetch';
 import deepExtend from 'deep-extend';
 import { Cache } from 'heap-local-storage';
 

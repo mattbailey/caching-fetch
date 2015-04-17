@@ -1,6 +1,6 @@
 import chai from 'chai';
 import xhr from '../src/caching-fetch';
-import fetch from 'isomorphic-fetch';
+import 'isomorphic-fetch';
 import nock from 'nock';
 import { Cache } from 'heap-local-storage';
 
@@ -90,12 +90,7 @@ describe('# build URL', () => {
     });
 });
 
-describe('# fetch & nock', () => {
-
-    afterEach(() => {
-        nock.disableNetConnect();
-        nock.cleanAll();
-    });
+describe('# fetch', () => {
 
     it('real request', done => {
         nock.enableNetConnect();
@@ -124,6 +119,19 @@ describe('# fetch & nock', () => {
                     .contains('Ensure the done() callback is being called in this test');
                 done();
             });
+    });
+});
+
+describe('# fetch & nock', () => {
+
+    beforeEach(() => {
+        nock.disableNetConnect();
+        nock.cleanAll();
+    });
+
+    afterEach(() => {
+        nock.disableNetConnect();
+        nock.cleanAll();
     });
 
     it('mock request', done => {
