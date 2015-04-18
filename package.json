@@ -1,8 +1,8 @@
 {
   "name": "caching-fetch",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Wrapper around Fetch API with localStorage cache support.",
-  "main": "lib/cahcing-fetch.js",
+  "main": "lib/caching-fetch.js",
   "scripts": {
     "test-cli": "mocha --compilers js:babel/register -r mock-local-storage ./test/caching-fetch.js",
     "test-srv": "webpack-dev-server mocha!./test/caching-fetch-brw.js --output-file testBundle.js",
