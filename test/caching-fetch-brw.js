@@ -92,10 +92,50 @@ describe('# build URL', () => {
 describe('# fetch', () => {
 
     it('real request', done => {
-        fetch('http://server.cors-api.appspot.com/server?enable=true&status=200&credentials=false')
+        fetch('http://echo.jsontest.com/meaning/42/')
             .then(response => {
                 response.status.should.equal(200);
-                response.json().should.deep.equal({});
+                return Promise.resolve(response.json());
+            })
+            .then(json => {
+                json.should.deep.equal({'meaning':'42'});
+                done();
+            })
+            .catch(e => {
+                done(e);
+            });
+    });
+
+    /*
+     * This test should fail, because timout is not part of API (yet?).
+     *
+    it('real request with timeout', done => {
+        fetch('http://www.google.com:8888', {
+                timeout: 500
+            })
+            .then(response => {
+                response.status.should.equal(0);
+                done();
+            })
+            .catch(error => {
+                error.toString().should.not
+                    .contains('Ensure the done() callback is being called in this test');
+                done();
+            });
+    });
+    */
+});
+
+describe('# caching-fetch', () => {
+
+    it('real request', done => {
+        xhr.fetch('http://echo.jsontest.com/meaning/42/')
+            .then(response => {
+                response.status.should.equal(200);
+                return Promise.resolve(response.json());
+            })
+            .then(json => {
+                json.should.deep.equal({'meaning':'42'});
                 done();
             })
             .catch(e => {
@@ -104,7 +144,7 @@ describe('# fetch', () => {
     });
 
     it('real request with timeout', done => {
-        fetch('http://www.google.com:8888', {
+        xhr.fetch('http://www.google.com:8888', {
                 timeout: 500
             })
             .then(response => {

@@ -94,10 +94,13 @@ describe('# fetch', () => {
 
     it('real request', done => {
         nock.enableNetConnect();
-        fetch('http://server.cors-api.appspot.com/server?enable=true&status=200&credentials=false')
+        fetch('http://echo.jsontest.com/meaning/42/')
             .then(response => {
                 response.status.should.equal(200);
-                response.json().should.deep.equal({});
+                return Promise.resolve(response.json());
+            })
+            .then(json => {
+                json.should.deep.equal({'meaning':'42'});
                 done();
             })
             .catch(e => {
@@ -135,14 +138,13 @@ describe('# fetch & nock', () => {
     });
 
     it('mock request', done => {
-        nock('http://server.cors-api.appspot.com/server-mock/')
-            .get('/?enable=true&status=200&credentials=false')
+        nock('http://echo.jsontest.com/meaning/42/')
+            .get('/')
             .reply(200, {
                 mocked: true
             });
 
-        fetch('http://server.cors-api.appspot.com/server-mock/' +
-                '?enable=true&status=200&credentials=false')
+        fetch('http://echo.jsontest.com/meaning/42/')
             .then(response => {
                 response.status.should.equal(200);
                 response.headers.get('Content-Type').should.equal('application/json');
@@ -176,6 +178,38 @@ describe('# caching-fetch', () => {
     afterEach(() => {
         nock.disableNetConnect();
         nock.cleanAll();
+    });
+
+    it('real request', done => {
+        nock.enableNetConnect();
+        xhr.fetch('http://echo.jsontest.com/meaning/42/')
+            .then(response => {
+                response.status.should.equal(200);
+                return Promise.resolve(response.json());
+            })
+            .then(json => {
+                json.should.deep.equal({'meaning':'42'});
+                done();
+            })
+            .catch(e => {
+                done(e);
+            });
+    });
+
+    it('real request with timeout', done => {
+        nock.enableNetConnect();
+        xhr.fetch('http://www.google.com:8888', {
+                timeout: 500
+            })
+            .then(response => {
+                response.status.should.equal(0);
+                done();
+            })
+            .catch(error => {
+                error.toString().should.not
+                    .contains('Ensure the done() callback is being called in this test');
+                done();
+            });
     });
 
     function t(url, done, setup, _fetch, stateCheck1, dataCheck1, stateCheck2, dataCheck2) {

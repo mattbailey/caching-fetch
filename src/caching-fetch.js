@@ -136,19 +136,32 @@ function _notifingFetch(url, options) {
         url += Math.random().toString(36).slice(2, 10);
     }
     delete options.cache; // not supported by underlying implementation yet
-    return fetch(url, options)
+    let promises = [],
+        t = null;
+    promises.push(
+        fetch(url, options)
         .then(response => {
+            !t || window.clearTimeout(t);
             if (!_connected) {
                 _cb(_connected = true);
             }
             return Promise.resolve(response);
         })
         .catch(error => {
+            !t || window.clearTimeout(t);
             if (_connected) {
                 _cb(_connected = false);
             }
             return Promise.reject(error);
-        });
+        }));
+    if (typeof window !== 'undefined') {
+        promises.push(new Promise((resolve, reject) => {
+            t = window.setTimeout(() => {
+                reject(new Error('Network error, timeout exceeded.'));
+            }, options.timeout);
+        }));
+    }
+    return Promise.race(promises);
 }
 
 // This method utilizes localStorage to cache server responses with HTTP headers
