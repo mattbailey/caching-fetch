@@ -132,8 +132,14 @@ let _defaultOptions = {
 // callback. Successful request means that connection is OK.
 function _notifingFetch(url, options) {
     if (options.cache == 'reload') {
+        const size = 15;
+        var rnd = '';
+        while (rnd.length < size) {
+            rnd += Math.random().toString(36).slice(2).toUpperCase();
+        }
+        rnd = rnd.slice(0, size);
         url += ';';
-        url += Math.random().toString(36).slice(2, 10);
+        url += rnd;
     }
     delete options.cache; // not supported by underlying implementation yet
     let promises = [],

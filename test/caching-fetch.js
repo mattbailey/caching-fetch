@@ -214,14 +214,19 @@ describe('# caching-fetch', () => {
 
     function t(url, done, setup, _fetch, stateCheck1, dataCheck1, stateCheck2, dataCheck2) {
         var n = setup(url);
-        _fetch(url)
+	if (!_fetch[0]) {
+	    _fetch = [_fetch, _fetch];
+	} else if (!_fetch[1]) {
+	    _fetch[1] = _fetch[0];
+	}
+        _fetch[0](url)
             .then(response => {
                 stateCheck1(url, response);
                 return Promise.resolve(response.json())
             })
             .then(json => {
                 dataCheck1(url, json);
-                return Promise.resolve(_fetch(url));
+                return Promise.resolve(_fetch[1](url));
             })
             .then(response => {
                 stateCheck2 ? stateCheck2(url, response) : stateCheck1(url, response);
@@ -376,5 +381,43 @@ describe('# caching-fetch', () => {
             }, url => {
                 return xhr.fetch(url);
             }, () => {}, () => {});
+    });
+
+    it('cache: reload', (done) => {
+        var d = new Date();
+        d.setDate((new Date()).getDate() + 3);
+        t(xhr.url('http://F/', {
+                arg0: 'val0',
+                arg1: 42
+            }),
+            done,
+            url => {
+                var u = url.split('?');
+                return nock(u[0])
+		    .filteringPath(/;.*$/, '') // remove random part
+                    .get('/?' + u[1])
+                    .twice()
+                    .reply(200, data, {
+                        'Expires': d.toUTCString()
+                    });
+            }, [url => {
+                return xhr.fetch(url);
+            }, url => {
+                return xhr.fetch(url, {
+                    cache: 'reload'
+                });
+            }], (url, response) => {
+                response.status.should.equal(200);
+                response.headers.get('Content-Type').should.equal('application/json');
+                response.headers.get('Expires').should.equal(d.toUTCString());
+            }, (url, json) => {
+                json.should.be.deep.equal(data);
+            }, null, (url, json) => {
+                json.should.be.deep.equal(data);
+                var _cache = new Cache('xhr', 1000);
+                var r = _cache.getItem(_cache.keyFromUrl(url));
+                r.headers['expires'][0].should.equal(d.toUTCString());
+                JSON.parse(r.responseText).should.deep.equal(data);
+            });
     });
 });
