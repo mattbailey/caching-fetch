@@ -78,6 +78,12 @@ module.exports = {
         _defaultOptions = options;
     },
 
+    // Use this method to append default options (merge new default options
+    // with existed).
+    appendDefaultOptions: options => {
+         deepExtend(_defaultOptions, options);
+    },
+
     // Use this method to pass callback function, which will be invoked
     // whenever connection state changes.
     // Callback should take boolean argument, which is true when connection
