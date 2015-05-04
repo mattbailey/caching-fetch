@@ -108,6 +108,12 @@ module.exports = {
             }
         }
         return _notifingFetch(url, opts);
+    },
+
+    // Method clearCache can be used to clear cached responses with cacheKeyPrefix.
+    // If cacheKeyPrefix is undefined, method clears default namespace.
+    clearCache: (cacheKeyPrefix) => {
+        new Cache(cacheKeyPrefix || _defaultOptions.cacheKeyPrefix, _defaultOptions.cacheMaxItems).clear();
     }
 };
 
@@ -120,14 +126,12 @@ let _defaultOptions = {
             'Content-Type': 'application/json'
         },
         cache: 'default',
-        timeout: 5000
+        timeout: 5000,
+        cacheKeyPrefix: 'xhr',
+        cacheMaxItems: 1000
     },
     _cb = () => {},
     _connected = true,
-    _cacheSettings = {
-        keyPrefix: 'xhr',
-        maxItems: 1000
-    },
     _cache;
 
 
@@ -182,7 +186,7 @@ function _notifingFetch(url, options) {
 function _cachingFetch(url, options) {
     return Promise.resolve((() => {
             if (!_cache) {
-                _cache = new Cache(_cacheSettings.keyPrefix, _cacheSettings.maxItems);
+                _cache = new Cache(options.cacheKeyPrefix, options.cacheMaxItems);
             }
             let key = _cache.keyFromUrl(url);
             if (options.cache == 'reload') {
