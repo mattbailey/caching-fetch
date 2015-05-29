@@ -1,6 +1,6 @@
 {
   "name": "caching-fetch",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Wrapper around Fetch API with localStorage cache support.",
   "main": "lib/caching-fetch.js",
   "scripts": {

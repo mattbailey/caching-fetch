@@ -132,6 +132,7 @@ describe('# caching-fetch', () => {
         xhr.fetch('http://echo.jsontest.com/meaning/42/')
             .then(response => {
                 response.status.should.equal(200);
+		response.headers.get('Content-Type').should.contains('json');
                 return Promise.resolve(response.json());
             })
             .then(json => {

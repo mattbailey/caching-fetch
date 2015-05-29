@@ -128,7 +128,8 @@ let _defaultOptions = {
         cache: 'default',
         timeout: 5000,
         cacheKeyPrefix: 'xhr',
-        cacheMaxItems: 1000
+        cacheMaxItems: 1000,
+	randomQueryParamName: '_'
     },
     _cacheKeyPrefixPrev = '',
     _cacheMaxItemsPrev = 0,
@@ -143,35 +144,37 @@ let _defaultOptions = {
 // status change. It assumes connection is lost when fetch() invokes error
 // callback. Successful request means that connection is OK.
 function _notifingFetch(url, options) {
-    if (options.cache == 'reload') {
-        const size = 15;
-        var rnd = '';
-        while (rnd.length < size) {
-            rnd += Math.random().toString(36).slice(2).toUpperCase();
-        }
-        rnd = rnd.slice(0, size);
-        url += ';';
-        url += rnd;
-    }
-    delete options.cache; // not supported by underlying implementation yet
-    let promises = [],
+    // Force underlying implementation to always bypass cache,
+    // so that only our cache was used.
+    // This is done so because some implementations of fetch don't have caching yet,
+    // and another (firefox, for instance) don't allow to force reload or clear 
+    // cache via options.
+    const size = 15;
+    let rnd = '',
+        promises = [],
         t = null;
+    while (rnd.length < size) {
+        rnd += Math.random().toString(36).slice(2).toUpperCase();
+    }
+    rnd = rnd.slice(0, size);
+    url += ((url.indexOf('?') < 0 ? '?' : '&') + options.randomQueryParamName + "=" + rnd);
+    options.cache = 'no-cache';
     promises.push(
         fetch(url, options)
-        .then(response => {
-            !t || window.clearTimeout(t);
-            if (!_connected) {
-                _cb(_connected = true);
-            }
-            return Promise.resolve(response);
-        })
-        .catch(error => {
-            !t || window.clearTimeout(t);
-            if (_connected) {
-                _cb(_connected = false);
-            }
-            return Promise.reject(error);
-        }));
+            .then(response => {
+                !t || window.clearTimeout(t);
+                if (!_connected) {
+                    _cb(_connected = true);
+                }
+                return Promise.resolve(response);
+            })
+            .catch(error => {
+                !t || window.clearTimeout(t);
+                if (_connected) {
+                    _cb(_connected = false);
+                }
+                return Promise.reject(error);
+            }));
     if (typeof window !== 'undefined') {
         promises.push(new Promise((resolve, reject) => {
             t = window.setTimeout(() => {
@@ -286,7 +289,19 @@ function _cachingFetch(url, options) {
 // Unifies header objects returned by fetch and from cache 
 function _headers(h) {
     // NB: there is no API to fetch all headers
-    let m = JSON.parse(JSON.stringify(h.map || h._headers || h));
+    let m = {};
+    if (Object.keys(h).length == 0 && h.keys) {
+        let keys = h.keys();
+        for (let k = keys.next(); !k.done; k = keys.next()) {
+            let key = k.value;
+            if (!m[key]) {
+                m[key] = [];
+            }
+            m[key].push(h.get(key));
+        }
+    } else {
+        m = JSON.parse(JSON.stringify(h.map || h._headers || h));
+    }
     Object.defineProperty(m, 'get', {
         get: () => {
             return k => {
