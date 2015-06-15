@@ -236,6 +236,9 @@ describe('# caching-fetch', () => {
                 dataCheck1(url, json);
                 return Promise.resolve(_fetch[1](url));
             })
+	    .catch(e => {
+                return Promise.resolve(_fetch[1](url));
+	    })
             .then(response => {
                 stateCheck2 ? stateCheck2(url, response) : stateCheck1(url, response);
                 return Promise.resolve(response.json())
@@ -254,7 +257,11 @@ describe('# caching-fetch', () => {
         t('http://A/',
             done,
             url => {
-                return nock(url).get('/').twice().reply(200, data);
+                return nock(url)
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?_=xxx')
+                    .twice()
+                    .reply(200, data);
             }, url => {
                 return xhr.fetch(url);
             }, (url, response) => {
@@ -274,9 +281,13 @@ describe('# caching-fetch', () => {
         t('http://B/',
             done,
             url => {
-                return nock(url).get('/').twice().reply(200, data, {
-                    'Expires': d.toUTCString()
-                });
+                return nock(url)
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?_=xxx')
+                    .twice()
+                    .reply(200, data, {
+                        'Expires': d.toUTCString()
+                    });
             }, url => {
                 return xhr.fetch(url, {
                     cache: 'no-cache'
@@ -303,9 +314,12 @@ describe('# caching-fetch', () => {
             done,
             url => {
                 var u = url.split('?');
-                return nock(u[0]).get('/?' + u[1]).reply(200, data, {
-                    'Expires': d.toUTCString()
-                });
+                return nock(u[0])
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?' + u[1] + '&_=xxx')
+                    .reply(200, data, {
+                        'Expires': d.toUTCString()
+                    });
             }, url => {
                 return xhr.fetch(url);
             }, (url, response) => {
@@ -337,15 +351,16 @@ describe('# caching-fetch', () => {
             url => {
                 var u = url.split('?');
                 return nock(u[0])
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
                     .matchHeader('If-Modified-Since', (v) => {
                         return !v || v == d3.toUTCString();
                     })
-                    .get('/?' + u[1])
+                    .get('/?' + u[1] + '&_=xxx')
                     .reply(200, data, {
                         'Last-Modified': d3.toUTCString(),
                         'Expires': d1.toUTCString()
                     })
-                    .get('/?' + u[1])
+                    .get('/?' + u[1] + '&_=xxx')
                     .reply(304, data, {
                         'Last-Modified': d3.toUTCString(),
                         'Expires': d2.toUTCString()
@@ -379,13 +394,17 @@ describe('# caching-fetch', () => {
                 status.should.equal(false);
             } else if (c == 2) {
                 status.should.equal(true);
-                done();
             }
         });
         t('http://E/',
             done,
             url => {
-                return nock(url).get('/').reply(0, {}).get('/').reply(200, {});
+                return nock(url)
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?_=xxx')
+                    .replyWithError('Connection lost')
+                    .get('/?_=xxx')
+                    .reply(200, {});
             }, url => {
                 return xhr.fetch(url);
             }, () => {}, () => {});
@@ -402,8 +421,8 @@ describe('# caching-fetch', () => {
             url => {
                 var u = url.split('?');
                 return nock(u[0])
-                    .filteringPath(/;.*$/, '') // remove random part
-                    .get('/?' + u[1])
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?' + u[1] + '&_=xxx')
                     .twice()
                     .reply(200, data, {
                         'Expires': d.toUTCString()
@@ -435,9 +454,13 @@ describe('# caching-fetch', () => {
         t('http://G/',
             done,
             url => {
-                return nock(url).get('/').twice().reply(200, data, {
-                    'Expires': d.toUTCString()
-                });
+                return nock(url)
+                    .filteringPath(/_=[^&]*/g, '_=xxx')
+                    .get('/?_=xxx')
+                    .twice()
+                    .reply(200, data, {
+                        'Expires': d.toUTCString()
+                    });
             }, url => {
                 return xhr.fetch(url, {cacheKeyPrefix: 'some-prefix'});
             }, (url, response) => {
