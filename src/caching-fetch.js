@@ -41,7 +41,6 @@ module.exports = {
     url: (url, args) => {
         let keys = !args || Object.keys(args),
             uri = url,
-            c = 0,
             arr = Object.prototype.toString.call(args) === '[object Array]';
         if (!args || !keys.length) {
             return url;
